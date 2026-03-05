@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useAnimate } from 'framer-motion'
+import { motion, useAnimate } from 'framer-motion'
 import type { Model, AgentStatus } from '../../types/agent'
 
 interface AgentCardProps {
@@ -8,8 +8,10 @@ interface AgentCardProps {
   status: AgentStatus
   progress: number   // 0–100
   currentTask: string
+  startedAt: number
   isSelected?: boolean
   isActivated?: boolean
+  isInitialHighlight?: boolean
   onClick?: () => void
 }
 
@@ -75,19 +77,31 @@ export default function AgentCard({
   status,
   progress,
   currentTask,
+  startedAt,
   isSelected = false,
   isActivated = false,
+  isInitialHighlight = false,
   onClick,
 }: AgentCardProps) {
   const clampedProgress = Math.min(100, Math.max(0, progress))
   const [scope, animate] = useAnimate()
   const prevStatusRef  = useRef<AgentStatus>(status)
-  const startedAtRef   = useRef<number | null>(null)
+  const startedAtRef   = useRef<number | null>(status === 'executing' ? startedAt : null)
   const intervalRef    = useRef<ReturnType<typeof setInterval> | null>(null)
-  const [elapsedSeconds, setElapsedSeconds] = useState<number | null>(null)
+  const [elapsedSeconds, setElapsedSeconds] = useState<number | null>(
+    status === 'executing' ? Math.floor((Date.now() - startedAt) / 1000) : null
+  )
+  const [justCompleted, setJustCompleted] = useState(false)
 
-  // Cleanup interval on unmount
-  useEffect(() => () => { if (intervalRef.current) clearInterval(intervalRef.current) }, [])
+  // Start interval immediately if already executing on mount; clean up on unmount
+  useEffect(() => {
+    if (status === 'executing') {
+      intervalRef.current = setInterval(() => {
+        setElapsedSeconds(Math.floor((Date.now() - startedAtRef.current!) / 1000))
+      }, 1000)
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Prompt-submit card pulse
   useEffect(() => {
@@ -106,6 +120,23 @@ export default function AgentCard({
     )
   }, [isActivated]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Initial auto-selection glow: fade in → hold → fade out (~700ms total)
+  useEffect(() => {
+    if (!isInitialHighlight || !scope.current) return
+    const glow = modelActivationGlow[model]
+    animate(
+      scope.current,
+      { boxShadow: glow },
+      { duration: 0.15, ease: 'easeOut' },
+    ).then(() =>
+      animate(
+        scope.current,
+        { boxShadow: 'none' },
+        { duration: 0.4, ease: 'easeIn', delay: 0.25 },
+      )
+    )
+  }, [isInitialHighlight]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Status transition effects: wake-up animations + execution timer
   useEffect(() => {
     const prev = prevStatusRef.current
@@ -120,6 +151,23 @@ export default function AgentCard({
       animate('[data-name]', { color: '#ffffff' }, { duration: 0.1, ease: 'easeIn' }).then(() =>
         animate('[data-name]', { color: '' }, { duration: 0.3, ease: 'easeOut' })
       )
+    }
+
+    // Any → done: completion celebration glow
+    if (prev !== 'done' && status === 'done' && scope.current) {
+      setJustCompleted(true)
+      animate(
+        scope.current,
+        { boxShadow: '0 0 0 1.5px rgba(74, 222, 128, 0.5), 0 0 14px 3px rgba(74, 222, 128, 0.15)' },
+        { duration: 0.2, ease: 'easeOut' },
+      ).then(() =>
+        animate(
+          scope.current,
+          { boxShadow: 'none' },
+          { duration: 0.45, ease: 'easeIn', delay: 0.2 },
+        )
+      )
+      setTimeout(() => setJustCompleted(false), 650)
     }
 
     // Any → executing: start timer
@@ -267,6 +315,18 @@ export default function AgentCard({
         <span className={`text-xs font-medium ${statusLabelClasses[status]}`}>
           {statusLabel[status]}
         </span>
+        {justCompleted && (
+          <motion.span
+            initial={{ opacity: 0, scale: 0.75 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="inline-flex items-center text-green-400"
+          >
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <polyline points="2,6.5 5,9.5 10,3" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </motion.span>
+        )}
         {(status === 'executing' || status === 'done') && elapsedSeconds !== null ? (
           <span className="ml-auto text-[10px] font-mono text-text-muted shrink-0">
             {elapsedSeconds}s

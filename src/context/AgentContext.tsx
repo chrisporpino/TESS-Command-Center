@@ -18,6 +18,16 @@ const initialState: AppState = {
 export function AgentProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(agentReducer, initialState)
 
+  // Auto-select an agent on initial load
+  useEffect(() => {
+    const active =
+      state.agents.find(a => a.status === 'executing') ||
+      state.agents.find(a => a.status === 'thinking') ||
+      state.agents[0]
+    if (active) dispatch({ type: 'SELECT_AGENT', id: active.id })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Always-fresh ref so simulation callbacks never read stale closures
   const stateRef = useRef<AppState>(state) as MutableRefObject<AppState>
   useEffect(() => { stateRef.current = state }, [state])

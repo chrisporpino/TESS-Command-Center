@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import AgentCard from '../agents/AgentCard'
 import { useAgentState, useAgentDispatch } from '../../context/AgentContext'
 import { usePromptFeedback } from '../../context/PromptFeedbackContext'
@@ -6,6 +7,17 @@ export default function AgentFeed() {
   const { agents, selectedAgentId } = useAgentState()
   const dispatch = useAgentDispatch()
   const { activatedId } = usePromptFeedback()
+
+  const [initialHighlightId, setInitialHighlightId] = useState<string | null>(null)
+  const didHighlight = useRef(false)
+
+  useEffect(() => {
+    if (selectedAgentId && !didHighlight.current) {
+      didHighlight.current = true
+      setInitialHighlightId(selectedAgentId)
+      setTimeout(() => setInitialHighlightId(null), 700)
+    }
+  }, [selectedAgentId])
 
   const activeCount = agents.filter(
     a => a.status === 'executing' || a.status === 'thinking'
@@ -31,8 +43,10 @@ export default function AgentFeed() {
             status={agent.status}
             progress={agent.progress}
             currentTask={agent.currentTask}
+            startedAt={agent.startedAt}
             isSelected={agent.id === selectedAgentId}
             isActivated={activatedId === agent.id || activatedId === '__ALL__'}
+            isInitialHighlight={agent.id === initialHighlightId}
             onClick={() => dispatch({ type: 'SELECT_AGENT', id: agent.id })}
           />
         ))}

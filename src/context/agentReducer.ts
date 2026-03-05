@@ -57,14 +57,26 @@ export function agentReducer(state: AppState, action: Action): AppState {
         agents: state.agents.map(agent => {
           if (agent.id !== action.id) return agent
           const nextStatus = action.status
-          // Reset progress only when starting a fresh execution cycle from non-executing state
-          const resetProgress =
-            nextStatus === 'thinking' && agent.status !== 'thinking' && agent.status !== 'executing'
+
+          let progress = agent.progress
+          let currentTask = action.currentTask ?? agent.currentTask
+
+          if (nextStatus === 'idle') {
+            progress = 0
+            currentTask = ''
+          } else if (nextStatus === 'done') {
+            progress = 100
+          } else if (nextStatus === 'thinking' && agent.status !== 'thinking' && agent.status !== 'executing') {
+            progress = 0
+          }
+          // 'executing': keep existing progress (simulation drives it via TICK_PROGRESS)
+          // 'error': freeze progress as-is
+
           return {
             ...agent,
             status: nextStatus,
-            progress: resetProgress ? 0 : agent.progress,
-            currentTask: action.currentTask ?? agent.currentTask,
+            progress,
+            currentTask,
             lastUpdatedAt: Date.now(),
           }
         }),

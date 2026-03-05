@@ -1,160 +1,136 @@
+<p align="center">
+
 # TESS Command Center
 
-Uma interface em tempo real para observar e interagir com múltiplos agentes de IA executando tarefas simultaneamente.
+**Uma interface de observabilidade para entender o que múltiplos agentes de IA estão fazendo em tempo real.**
 
-Este projeto explora como usuários podem **monitorar, compreender e orientar agentes autônomos** trabalhando em paralelo. Em vez de focar apenas na execução de prompts, a interface prioriza **visibilidade operacional** — tornar legível para humanos o que os agentes estão fazendo.
+![React](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Tailwind](https://img.shields.io/badge/TailwindCSS-3-38BDF8)
 
-A ideia é simular como poderia ser um **painel de operações para sistemas multi-agentes em produção**.
+</p>
 
----
+<p align="center">
+  <img src="./demo.gif" width="900">
+</p>
 
-# Como rodar o projeto
+## Contexto do Projeto
 
-```bash
-npm install
-npm run dev
-```
+**TESS Command Center** é uma interface em React projetada para visualizar e interagir com múltiplos agentes de IA executando tarefas simultaneamente.
 
-Abra no navegador:
+A aplicação não possui backend real — todos os dados e execuções são **simulados localmente**, permitindo demonstrar comportamento de agentes em tempo real.
 
-```
-http://localhost:5173
-```
+## Stack
 
-Não existe backend.
-Todos os dados e execuções são simulados localmente.
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Framer Motion
 
----
+Ferramentas de IA utilizadas durante o desenvolvimento:
 
-# Ferramentas utilizadas
+- **Claude Code** → geração e modificação de código
+- **ChatGPT** → revisão de UX, micro-interações e decisões de produto
 
-Este projeto foi desenvolvido utilizando **IA como parte do processo de desenvolvimento**.
+## Objetivo do Design
 
-Principais ferramentas:
+Demonstrar uma interface que permita:
 
-**Claude Code**
-Utilizado para estruturação da arquitetura do projeto, lógica de simulação dos agentes e gerenciamento de estado.
+- entender rapidamente o que múltiplos agentes estão fazendo
+- acompanhar execução em tempo real
+- interagir diretamente com agentes
 
-**ChatGPT**
-Utilizado como parceiro de design para refinamento de decisões de UX e definição de micro-interações.
+Com foco em **observabilidade**, **clareza visual** e **micro-interações elegantes**.
 
-**Vite + React + TypeScript**
-Ambiente de desenvolvimento rápido com arquitetura de componentes clara.
+## Arquitetura da Interface
 
-**Tailwind CSS**
-Sistema de estilos baseado em tokens, permitindo uma interface consistente em dark mode com acentos visuais por modelo.
+A interface segue um modelo de **atenção progressiva em três zonas**:
 
-**Framer Motion**
-Responsável pelas animações e micro-interações da interface.
+- **Feed de Agentes (esquerda)** — lista de agentes com nome, modelo, status, progresso e tempo de execução
+- **Terminal de Execução (centro)** — log em tempo real mostrando o que o agente está fazendo
+- **Painel de Detalhe (direita)** — histórico de prompts e envio de novas instruções para o agente selecionado
 
----
+## Estados dos Agentes
 
-# Decisões de UX
+| Status | Descrição |
+|---|---|
+| `idle` | aguardando instrução |
+| `thinking` | analisando o prompt |
+| `executing` | executando a tarefa |
+| `done` | tarefa finalizada |
+| `error` | erro durante execução |
 
-## 1. Modelo de atenção progressiva
+Fluxo típico: `idle → thinking → executing → done → idle`
 
-A interface segue uma estrutura de três zonas:
+## Simulação de Agentes
 
-* **Feed de agentes (esquerda)** — visão geral da atividade do sistema
-* **Terminal de execução (centro)** — foco operacional no que está acontecendo agora
-* **Detalhe do agente (direita)** — investigação contextual do agente selecionado
+O sistema inclui uma simulação que:
 
-Esse modelo reduz carga cognitiva quando múltiplos agentes estão executando ao mesmo tempo.
+- gera logs em tempo real
+- atualiza progresso
+- alterna estados automaticamente
+- simula múltiplos agentes trabalhando simultaneamente
 
-O usuário consegue manter consciência do sistema inteiro sem perder o foco no agente atual.
+Isso permite demonstrar a interface funcionando **sem necessidade de backend**.
 
----
+## Decisões de UX
 
-## 2. Separação visual entre interface e dados
+### Observability through motion
 
-Foram utilizados dois sistemas tipográficos distintos:
+Os estados dos agentes são comunicados através de **animação de borda sincronizada**:
 
-**Inter** — interface e navegação
-**JetBrains Mono** — dados operacionais (logs, timers, saída do sistema)
+- `idle` → sem animação
+- `thinking` → animação lenta
+- `executing` → animação rápida
 
-Essa separação ajuda o usuário a diferenciar rapidamente **estrutura da interface** de **atividade do sistema**.
+Todas as animações são **globalmente sincronizadas**, permitindo perceber o estado geral do sistema pela visão periférica.
 
----
+### Seleção automática de agente
 
-## 3. Cor representa identidade, não status
+Ao abrir a interface, um agente é selecionado automaticamente para evitar tela vazia.
 
-Cada modelo possui uma cor própria:
+Prioridade de seleção:
 
-* GPT → roxo
-* Claude → laranja
-* Gemini → verde
+1. agente `executing`
+2. agente `thinking`
+3. primeiro da lista
 
-Essas cores representam **identidade do modelo**, não estado de execução.
+Isso garante que:
 
-Os indicadores de status (thinking / executing / done) usam sinais visuais próprios para evitar ambiguidade.
+- o terminal já mostre atividade
+- o painel de detalhes esteja preenchido
+- a interface pareça viva desde o início
 
----
+### Timer de execução
 
-## 4. Fazer os agentes parecerem vivos
+Agentes em `executing` exibem tempo decorrido.
 
-Em vez de mudanças de estado estáticas, a interface simula **atividade contínua dos agentes**, incluindo:
+- o timer é inicializado a partir de `startedAt`
+- não depende de transição de estado para começar
 
-* streaming de logs
-* progresso de execução
-* snapshots de raciocínio
-* timers de execução
+### Regras de progresso
 
-Esses sinais ajudam o usuário a entender **o que o agente está fazendo neste momento**, e não apenas que ele está rodando.
+| Status | Progresso |
+|---|---|
+| `idle` | 0% |
+| `thinking` | 0–20% |
+| `executing` | 1–99% |
+| `done` | 100% |
+| `error` | congelado |
 
----
+## Micro-interações
 
-# Micro-interações
+- **Animação de borda sincronizada** — indica estado dos agentes
+- **Highlight ao carregar** — destaca o agente selecionado automaticamente
+- **Feedback ao enviar prompt** — pulso visual no card
+- **Glow no terminal** — ao iniciar execução
+- **Animação de conclusão** — destaque verde com ícone de check ao completar tarefa
 
-Algumas interações sutis foram adicionadas para tornar a interface mais responsiva:
+## Problemas resolvidos
 
-* micro-pulse no botão de envio de prompt
-* reação visual do AgentCard ao receber um comando
-* glow temporário no terminal quando uma execução inicia
-* transição animada entre estados (thinking → executing)
-
-Essas animações foram mantidas discretas para preservar a estética de **ferramenta profissional de operações**.
-
----
-
-# O que eu faria com mais tempo
-
-### 1. Visualização de trace do agente
-
-Adicionar uma visão detalhada da execução do agente (semelhante a ferramentas como LangSmith), mostrando:
-
-* chamadas de ferramentas
-* cadeia de raciocínio
-* etapas estruturadas de execução
-
----
-
-### 2. Métricas operacionais
-
-Expor métricas importantes do sistema:
-
-* uso de tokens
-* latência
-* número de tool calls
-
-Isso transformaria a interface de um monitor visual para uma ferramenta de **observabilidade de agentes**.
-
----
-
-### 3. Orquestração de agentes
-
-Adicionar capacidades de controle mais avançadas:
-
-* pausar / retomar agentes
-* filas de tarefas
-* visualização de dependências entre agentes
-
-Isso permitiria evoluir o sistema de **monitoramento** para **orquestração multi-agente**.
-
----
-
-# Consideração final
-
-À medida que sistemas de IA se tornam mais autônomos, o desafio deixa de ser apenas executar prompts e passa a ser **tornar esses sistemas compreensíveis para humanos**.
-
-O TESS Command Center é um pequeno experimento nessa direção:
-uma interface pensada para revelar **o que os agentes estão fazendo e por quê**.
+| Problema | Solução |
+|---|---|
+| Tela inicial vazia | Seleção automática de agente |
+| Timer não aparecia | `startedAt` adicionado nos agentes já em `executing` |
+| Idle mostrando 100% | Regras de progresso aplicadas nas transições de estado |
