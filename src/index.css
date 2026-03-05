@@ -113,4 +113,92 @@
   /* Layout geometry */
   --sidebar-width:      120px;
   --detail-panel-width: 420px;
+
+  /* Snake border animation cycles (reference values used in JS) */
+  --snake-cycle-thinking:  6s;
+  --snake-cycle-executing: 2s;
 }
+
+/* ── Snake Border — rotating conic-gradient for active agents ─
+ *
+ * Phase sync mechanism:
+ *   Each AgentCard computes animation-delay = −mod(now − t0, cycleMs) once,
+ *   on the transition into thinking/executing.  The negative delay makes the
+ *   animation appear to have started exactly (now−t0)%cycleMs milliseconds
+ *   ago — the same elapsed offset every card would have if they had all
+ *   started together at t0.  Result: phase(T) = (T−t0)%cycleMs for every
+ *   card, regardless of when it became active.
+ *
+ * CSS rules use ONLY longhand animation-* properties (never the shorthand).
+ * The duration/delay vars are written to each card element by useLayoutEffect
+ * in AgentCard; the animation restarts cleanly on every transition because
+ * useLayoutEffect removes and re-adds the snake-border class (force-restart)
+ * before the browser's first paint for that state.
+ * ─────────────────────────────────────────────────────────────────────── */
+
+@keyframes rotateSnake {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Model color tokens — set --snake-color on the card element */
+.snake-gpt    { --snake-color: var(--accent-gpt); }
+.snake-gemini { --snake-color: var(--accent-gemini); }
+.snake-claude { --snake-color: var(--accent-claude); }
+
+.snake-border {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Rotating conic-gradient layer — large square so the arc hits every edge */
+.snake-border::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 250%;
+  height: 250%;
+  background: conic-gradient(
+    from 0deg,
+    transparent  0deg,
+    transparent  320deg,
+    var(--snake-color) 340deg,
+    transparent  360deg
+  );
+  /* Longhand animation properties only — never the `animation` shorthand.
+     Shorthand resets all sub-properties to their initial values, which can
+     silently clobber the --snake-delay / --snake-duration vars mid-transition. */
+  animation-name:            rotateSnake;
+  animation-duration:        var(--snake-duration);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-delay:           var(--snake-delay);
+  animation-fill-mode:       none;
+  animation-play-state:      running;
+  /* Without vars set (initial render), animation-duration is invalid → dormant.
+     useLayoutEffect writes both vars and force-restarts before the first paint. */
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Inner mask — punches out card interior, leaving only the 2px border strip */
+.snake-border::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background-color: inherit;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Card content must sit above the mask */
+.snake-border > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Opacity: thinking is intentionally dimmer — activity indicator, not alarm */
+.snake-thinking::before  { opacity: 0.35; }
+.snake-executing::before { opacity: 0.65; }
