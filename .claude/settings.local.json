@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/desig/Downloads/projeto-tess/**)",
+      "Bash(npm create vite@latest tess-scaffold -- --template react-ts)",
+      "Bash(cp -r \"c:/Users/desig/Downloads/projeto-tess/tess-scaffold/.\" \"c:/Users/desig/Downloads/projeto-tess/TESS-Command-Center/\")",
+      "Bash(rm -rf \"c:/Users/desig/Downloads/projeto-tess/tess-scaffold\")"
+    ]
+  }
+}

@@ -1,0 +1,116 @@
+/* ── Fonts ─────────────────────────────────────────────────── */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+/* ── Tailwind ──────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ──────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Force dark mode — app is dark-only */
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    background-color: #111315;
+    color: #E8EAED;
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.5;
+  }
+
+  /* Scrollbar — subtle on dark bg */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #353B44;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4A525E;
+  }
+
+  /* Remove default button/input resets that conflict */
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  input, textarea {
+    font-family: inherit;
+  }
+}
+
+/* ── Component layer — reusable primitives ─────────────────── */
+@layer components {
+  /* Log / terminal text always monospace */
+  .font-terminal {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.75rem;
+    line-height: 1.6;
+  }
+
+  /* Accent left-border for agent cards per model */
+  .accent-border-gpt    { border-left: 2.5px solid #7C5CFF; }
+  .accent-border-gemini { border-left: 2.5px solid #1DB954; }
+  .accent-border-claude { border-left: 2.5px solid #FF8A3D; }
+
+  /* Ring highlight when agent card is selected */
+  .ring-gpt    { box-shadow: 0 0 0 1.5px #7C5CFF; }
+  .ring-gemini { box-shadow: 0 0 0 1.5px #1DB954; }
+  .ring-claude { box-shadow: 0 0 0 1.5px #FF8A3D; }
+}
+
+/* ── CSS Custom Properties — accessible via var() anywhere ─── */
+:root {
+  /* Surfaces */
+  --bg-base:     #111315;
+  --bg-surface:  #1A1D21;
+  --bg-elevated: #22262C;
+  --bg-overlay:  #2A2F37;
+
+  /* Borders */
+  --border-subtle: #2A2F37;
+  --border:        #353B44;
+  --border-strong: #4A525E;
+
+  /* Text */
+  --text-primary:   #E8EAED;
+  --text-secondary: #9BA3AF;
+  --text-muted:     #5C6470;
+
+  /* Model accents */
+  --accent-gpt:    #7C5CFF;
+  --accent-gemini: #1DB954;
+  --accent-claude: #FF8A3D;
+
+  /* Status */
+  --status-idle:      #5C6470;
+  --status-thinking:  #60A5FA;
+  --status-executing: #A78BFA;
+  --status-done:      #34D399;
+  --status-error:     #F87171;
+
+  /* Layout geometry */
+  --sidebar-width:      120px;
+  --detail-panel-width: 420px;
+}
