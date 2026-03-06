@@ -16,6 +16,18 @@
 
 A aplicação não possui backend real — todos os dados e execuções são **simulados localmente**, permitindo demonstrar comportamento de agentes em tempo real.
 
+## Rodar localmente
+
+```bash
+git clone https://github.com/seu-usuario/tess-command-center.git
+cd tess-command-center
+npm install
+npm run dev
+```
+
+Abra no navegador:
+http://localhost:5173
+
 ## Stack
 
 - React
