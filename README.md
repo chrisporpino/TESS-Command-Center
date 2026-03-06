@@ -35,13 +35,15 @@ Ferramentas de IA utilizadas durante o desenvolvimento:
 
 ## Objetivo do Design
 
-Demonstrar uma interface que permita:
+Explorar como interfaces podem tornar **sistemas de IA multi-agente observáveis e compreensíveis para humanos**.
 
-- entender rapidamente o que múltiplos agentes estão fazendo
-- acompanhar execução em tempo real
-- interagir diretamente com agentes
+O foco é permitir que usuários:
 
-Com foco em **observabilidade**, **clareza visual** e **micro-interações elegantes**.
+- entendam rapidamente o que múltiplos agentes estão fazendo
+- acompanhem execução em tempo real
+- interajam diretamente com agentes individuais
+
+Com ênfase em **observabilidade**, **clareza visual** e **micro-interações elegantes**.
 
 ## Arquitetura da Interface
 
@@ -134,3 +136,9 @@ Agentes em `executing` exibem tempo decorrido.
 | Tela inicial vazia | Seleção automática de agente |
 | Timer não aparecia | `startedAt` adicionado nos agentes já em `executing` |
 | Idle mostrando 100% | Regras de progresso aplicadas nas transições de estado |
+
+## Considerações finais
+
+Este projeto explora como **interfaces de observabilidade podem tornar sistemas de IA multi-agente mais compreensíveis e operáveis por humanos**.
+
+Mesmo com dados simulados, o objetivo foi construir uma experiência que se aproxime de ferramentas reais usadas para monitorar e operar sistemas de agentes em tempo real.
