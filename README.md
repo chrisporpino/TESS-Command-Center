@@ -4,10 +4,6 @@
 
 **Uma interface de observabilidade para entender o que múltiplos agentes de IA estão fazendo em tempo real.**
 
-![React](https://img.shields.io/badge/React-18-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Tailwind](https://img.shields.io/badge/TailwindCSS-3-38BDF8)
-
 </p>
 
 <p align="center">
